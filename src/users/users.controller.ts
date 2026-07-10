@@ -1,7 +1,7 @@
 import { generateMockUsers } from './users.generator.ts';
 import { createReadController } from '../common/read.controller.ts';
 
-const users = generateMockUsers(50);
+const users = generateMockUsers(10000);
 const controller = createReadController(users, 'User');
 
 export const getAllUsers = controller.getAll;
