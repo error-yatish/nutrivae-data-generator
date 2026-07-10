@@ -1,5 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
+const cors = require('cors');
 
 import cartRoutes from './carts/carts.routes.ts';
 import categoryRoutes from './categories/categories.routes.ts';
@@ -14,6 +15,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cors({ origin: 'http://localhost:5173' })); 
 
 app.use('/api/carts', cartRoutes);
 app.use('/api/categories', categoryRoutes);
