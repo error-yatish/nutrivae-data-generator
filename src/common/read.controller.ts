@@ -4,20 +4,22 @@ type Identifiable = {
   id: string;
 };
 
-const getLimit = (value: unknown): number => {
+const parseNumber = (value: unknown, defaulValue = 0): number => {
   const parsed = Number.parseInt(String(value), 10);
 
   if (!Number.isFinite(parsed) || parsed < 1) {
-    return 5;
+    return defaulValue;
   }
 
-  return Math.min(parsed, 100);
+  return parsed;
 };
 
-const getOffset = (value: unknown, limit: number): number => {
-  const parsedPage = Number.parseInt(String(value), 10);
+const getLimit = (value: unknown): number => Math.min(parseNumber(value, 5), 100);
 
-  if (!Number.isFinite(parsedPage) || parsedPage <= 1) {
+const getOffset = (value: unknown, limit: number): number => {
+  const parsedPage = parseNumber(value);
+
+  if (parsedPage <= 1) {
     return 0;
   }
 
@@ -29,10 +31,16 @@ export const createReadController = <T extends Identifiable>(
   resourceName: string
 ) => ({
   getAll: (req: Request, res: Response): void => {
+    const total = parseNumber(req.query.total, 10000);
+    const page = parseNumber(req.query.page, 1);
     const limit = getLimit(req.query.limit);
     const offset = getOffset(req.query.page, limit);
-    
-    res.json(items.slice(offset, offset + limit));
+    const totalPage = Math.ceil(total / limit);
+
+    res.json({
+      items: page <= totalPage ? items.slice(offset, Math.min(offset + limit, total)) : [],
+      next: page < totalPage ? offset + limit : null
+    });
   },
   getById: (req: Request, res: Response): void => {
     const id = req.params.id as string;
